@@ -1,3 +1,37 @@
+快速排序
+
+
+```python
+def selection_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        # 找到从i到n中最小的元素的索引
+        min_idx = i
+        for j in range(i+1, n):
+            if arr[j] < arr[min_idx]:
+                min_idx = j
+        
+        # 将找到的最小元素交换到它的位置
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]
+def test():
+    # 执行数据输入
+    arr = [64, 25, 12, 22, 11]
+    print("原始数组:", arr)
+    
+    # 调用 selection_sort 函数进行排序
+    selection_sort(arr)
+    
+    # 输出结果
+    print("排序后的数组:", arr)
+
+# 调用 test 函数进行测试
+test()
+```
+
+    原始数组: [64, 25, 12, 22, 11]
+    排序后的数组: [11, 12, 22, 25, 64]
+    
+
 试着输入一行代码，查看执行效果：
 
 
@@ -24,7 +58,7 @@ print('%d squared is %d' % (x, y))
 
 ```
 
-    9 squared is 81
+    5 squared is 25
     
 
 
@@ -36,14 +70,16 @@ import seaborn as sns
 
 ```
 
+使用pandas
+
 
 ```python
-df = pd.read_csv('fortune500.csv')
+df = pd.read_csv('fortune500.csv')#读取文件
 ```
 
 
 ```python
-df.head()
+df.head()#查看前5行
 ```
 
 
@@ -123,7 +159,7 @@ df.head()
 
 
 ```python
-df.tail()
+df.tail()#查看最后5行
 ```
 
 
@@ -203,12 +239,12 @@ df.tail()
 
 
 ```python
-df.columns = ['year', 'rank', 'company', 'revenue', 'profit']
+df.columns = ['year', 'rank', 'company', 'revenue', 'profit']#设置列名
 ```
 
 
 ```python
-len(df)
+len(df)#查看条目数
 ```
 
 
@@ -220,7 +256,7 @@ len(df)
 
 
 ```python
-df.dtypes
+df.dtypes#查看不同列的数据类型,profit存在异常
 ```
 
 
@@ -237,7 +273,7 @@ df.dtypes
 
 
 ```python
-non_numberic_profits = df.profit.str.contains('[^0-9.-]')
+non_numberic_profits = df.profit.str.contains('[^0-9.-]')#检查非数字的列情况
 df.loc[non_numberic_profits].head()
 ```
 
@@ -318,7 +354,7 @@ df.loc[non_numberic_profits].head()
 
 
 ```python
-len(df.profit[non_numberic_profits])
+len(df.profit[non_numberic_profits])#查看总共有多少非数字的收益
 ```
 
 
@@ -330,24 +366,24 @@ len(df.profit[non_numberic_profits])
 
 
 ```python
-bin_sizes, _, _ = plt.hist(df.year[non_numberic_profits], bins=range(1955, 2006))
+bin_sizes, _, _ = plt.hist(df.year[non_numberic_profits], bins=range(1955, 2006))#用直方图查看非数字收益的大体情况
 ```
 
 
     
-![png](output_13_0.png)
+![png](output_16_0.png)
     
 
 
 
 ```python
-df = df.loc[~non_numberic_profits]
+df = df.loc[~non_numberic_profits]#删除这些非法记录
 df.profit = df.profit.apply(pd.to_numeric)
 ```
 
 
 ```python
-len(df)
+len(df)#删除后查看条目数
 ```
 
 
@@ -359,7 +395,7 @@ len(df)
 
 
 ```python
-df.dtypes
+df.dtypes#重新查看数据类型,现在正常
 ```
 
 
@@ -374,9 +410,11 @@ df.dtypes
 
 
 
+matplotlib使用
+
 
 ```python
-group_by_year = df.loc[:, ['year', 'revenue', 'profit']].groupby('year')
+group_by_year = df.loc[:, ['year', 'revenue', 'profit']].groupby('year')#以年分组绘制平均利润和收入
 avgs = group_by_year.mean()
 x = avgs.index
 y1 = avgs.profit
@@ -390,26 +428,26 @@ def plot(x, y, ax, title, y_label):
 
 
 ```python
-fig, ax = plt.subplots()
+fig, ax = plt.subplots()#1990年类似指数增长,但之后急剧下降
 plot(x, y1, ax, 'Increase in mean Fortune 500 company profits from 1955 to 2005', 'Profit (millions)')
 ```
 
 
     
-![png](output_18_0.png)
+![png](output_22_0.png)
     
 
 
 
 ```python
-y2 = avgs.revenue
+y2 = avgs.revenue#查看平均收入曲线
 fig, ax = plt.subplots()
 plot(x, y2, ax, 'Increase in mean Fortune 500 company revenues from 1955 to 2005', 'Revenue (millions)')
 ```
 
 
     
-![png](output_19_0.png)
+![png](output_23_0.png)
     
 
 
@@ -430,11 +468,76 @@ fig.tight_layout()
 
 
     
-![png](output_20_0.png)
+![png](output_24_0.png)
     
 
 
 
 ```python
+根据标准差来查看前10%和后10%谁的波动更大
+```
 
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 加载数据集
+df = pd.read_csv('fortune500.csv')
+
+# 重命名列
+df.columns = ['year', 'rank', 'company', 'revenue', 'profit']
+
+# 清洗数据，删除无效的利润记录
+non_numberic_profits = df.profit.str.contains('[^0-9.-]')
+df = df.loc[~non_numberic_profits]
+df.profit = df.profit.apply(pd.to_numeric)
+
+# 按年份分组
+group_by_year = df.groupby('year')
+
+# 准备存储标准差的DataFrame
+std_devs = pd.DataFrame()
+
+# 计算每一年前10%和后10%公司的收入和利润的标准差
+for year, group in group_by_year:
+    revenue_std = group.revenue.std()
+    profit_std = group.profit.std()
+    top_revenue_std = group.revenue.nlargest(int(len(group) * 0.1)).std()
+    top_profit_std = group.profit.nlargest(int(len(group) * 0.1)).std()
+    bottom_revenue_std = group.revenue.nsmallest(int(len(group) * 0.1)).std()
+    bottom_profit_std = group.profit.nsmallest(int(len(group) * 0.1)).std()
+    std_devs = pd.concat([std_devs, pd.DataFrame({
+        'year': [year],
+        'revenue_std': [revenue_std],
+        'profit_std': [profit_std],
+        'top_revenue_std': [top_revenue_std],
+        'top_profit_std': [top_profit_std],
+        'bottom_revenue_std': [bottom_revenue_std],
+        'bottom_profit_std': [bottom_profit_std]
+    })], ignore_index=True)
+
+# 绘制结果
+plt.figure(figsize=(10, 6))
+for column in std_devs.columns[1:]:
+    plt.plot(std_devs['year'], std_devs[column], label=column)
+
+plt.xlabel('Year')
+plt.ylabel('Standard Deviation')
+plt.title('Standard Deviation of Revenue and Profit for Top 10% and Bottom 10% Companies')
+plt.legend()
+plt.show()
+
+```
+
+
+    
+![png](output_26_0.png)
+    
+
+
+
+```python
+很明显年份的影响更大
 ```
