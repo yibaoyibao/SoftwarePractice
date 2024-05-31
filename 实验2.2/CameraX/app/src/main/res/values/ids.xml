@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="image_capture_button" type="id"></item>
+    <item name="video_capture_button" type="id"></item>
+    <item name="vertical_centerline" type="id"></item>
+    <item name="viewFinder" type="id"></item>
+</resources>
